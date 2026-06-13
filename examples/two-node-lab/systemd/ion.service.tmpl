@@ -1,0 +1,22 @@
+[Unit]
+Description=ION DTN Node
+After=network.target
+Wants=network.target
+
+[Service]
+Type=forking
+User=@ION_USER@
+Group=@ION_GROUP@
+WorkingDirectory=/var/lib/ion
+ExecStart=/usr/local/bin/ion-start
+ExecStop=/usr/local/bin/ion-stop
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ion
+# ION needs the host IPC shared-memory namespace
+IpcNamespacePath=/proc/1/ns/ipc
+
+[Install]
+WantedBy=multi-user.target

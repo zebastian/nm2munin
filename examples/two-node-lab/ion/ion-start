@@ -1,0 +1,9 @@
+#!/bin/bash
+# Bring up the ION stack (UDP CLA). NM manager/agent run as separate services.
+set -e
+cd /var/lib/ion
+ionadmin    /etc/ion/ion.rc
+ionsecadmin /etc/ion/ionsec.rc
+bpadmin     /etc/ion/bp.rc
+ipnadmin    /etc/ion/ipn.rc
+echo "ION stack started."

@@ -1,0 +1,23 @@
+[Unit]
+Description=Dummy DTN traffic generator (diurnal curve for Munin charts)
+After=ion.service
+Requires=ion.service
+
+[Service]
+Type=simple
+User=@ION_USER@
+Group=@ION_GROUP@
+WorkingDirectory=/var/lib/ion
+Environment=DUMMY_TICK=@DUMMY_TICK@
+Environment=DUMMY_MAXRATE=@DUMMY_MAXRATE@
+ExecStartPre=/bin/sleep 4
+ExecStart=/usr/bin/python3 @INSTALL_DIR@/dummy_traffic.py
+Restart=on-failure
+RestartSec=5
+IpcNamespacePath=/proc/1/ns/ipc
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dummy-traffic
+
+[Install]
+WantedBy=multi-user.target

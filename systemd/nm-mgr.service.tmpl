@@ -1,0 +1,24 @@
+[Unit]
+Description=ION NM manager + curated report poller
+After=ion.service nm-agent.service
+Requires=ion.service
+
+[Service]
+Type=simple
+User=@ION_USER@
+Group=@ION_GROUP@
+WorkingDirectory=/var/lib/ion
+Environment=NM_MGR_EID=@MGR_EID@
+Environment="NM_AGENTS=@NM_AGENTS@"
+Environment=NM_INTERVAL=@NM_INTERVAL@
+ExecStartPre=/bin/sleep 5
+ExecStart=/usr/bin/python3 @INSTALL_DIR@/nm_mgr_run.py
+Restart=always
+RestartSec=5
+IpcNamespacePath=/proc/1/ns/ipc
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=nm-mgr
+
+[Install]
+WantedBy=multi-user.target

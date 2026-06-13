@@ -1,0 +1,10 @@
+1
+a scheme ipn 'ipnfw' 'ipnadminep'
+a endpoint ipn:@NODE_NBR@.0 q
+a endpoint ipn:@NODE_NBR@.1 q
+a endpoint ipn:@NODE_NBR@.2 q
+a endpoint ipn:@NODE_NBR@.3 q
+a protocol udp 1400 100
+a induct udp @LOCAL_IP@:@CLA_PORT@ udpcli
+a outduct udp @PEER_IP@:@CLA_PORT@ udpclo
+s

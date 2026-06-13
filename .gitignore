@@ -1,0 +1,12 @@
+# rendered, host-specific output
+/build/
+/examples/*/build/
+# local manager config (copied from manager.env.example)
+/config/manager.env
+# scratch capture of live host files
+/_capture/
+# IDE
+/.idea/
+__pycache__/
+*.pyc
+*~

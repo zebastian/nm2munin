@@ -1,0 +1,19 @@
+[Unit]
+Description=nm2munin bridge (NM reports -> Munin spoolfetch, time-shift capable)
+After=nm-mgr.service
+
+[Service]
+Type=simple
+User=@ION_USER@
+Group=@ION_GROUP@
+WorkingDirectory=@INSTALL_DIR@
+Environment=NM2MUNIN_BIND=@NM2MUNIN_BIND@
+ExecStart=/usr/bin/python3 @INSTALL_DIR@/bridge.py @BRIDGE_MAP@
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=nm2munin
+
+[Install]
+WantedBy=multi-user.target

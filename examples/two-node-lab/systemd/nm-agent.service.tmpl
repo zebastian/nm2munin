@@ -1,0 +1,22 @@
+[Unit]
+Description=ION NM agent
+After=ion.service
+Requires=ion.service
+
+[Service]
+Type=simple
+User=@ION_USER@
+Group=@ION_GROUP@
+WorkingDirectory=/var/lib/ion
+EnvironmentFile=/etc/ion/nm-agent.env
+ExecStartPre=/bin/sleep 3
+ExecStart=/usr/local/bin/nm_agent ${AGENT_EID} ${MGR_EID}
+Restart=on-failure
+RestartSec=5
+IpcNamespacePath=/proc/1/ns/ipc
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=nm-agent
+
+[Install]
+WantedBy=multi-user.target
