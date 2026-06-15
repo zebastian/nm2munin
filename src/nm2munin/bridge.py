@@ -41,20 +41,20 @@ BIND_ADDR = os.environ.get("NM2MUNIN_BIND", "127.0.0.1")
 # ---------------------------------------------------------------------------
 GRAPHS = {
     "bp_traffic": {
-        "title": "BP bundles (pending / custody)",
+        "title": "BP bundles",
         "vlabel": "bundles",
         "category": "dtn",
         "fields": ["num_pend_fwd", "num_pend_dis", "num_in_cust",
-                   "num_pend_reassembly"],
+                   "num_pend_reassembly", "num_fragmented_bundles",
+                   "num_fragments_produced"],
     },
     "bp_errors": {
-        "title": "BP discarded / failed / abandoned bundles",
+        "title": "BP bundle errors",
         "vlabel": "bundles",
         "category": "dtn",
         "fields": ["num_bundles_deleted", "failed_custody_bundles",
                    "failed_forward_bundles", "abandoned_bundles",
-                   "discarded_bundles", "num_fragmented_bundles",
-                   "num_fragments_produced"],
+                   "discarded_bundles"],
     },
     "bp_storage": {
         "title": "BP registrations",
