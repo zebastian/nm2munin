@@ -8,6 +8,7 @@ User=@ION_USER@
 Group=@ION_GROUP@
 WorkingDirectory=@INSTALL_DIR@
 Environment=NM2MUNIN_BIND=@NM2MUNIN_BIND@
+Environment="NM2MUNIN_HIDDEN_GRAPHS=@HIDDEN_GRAPHS@"
 ExecStart=/usr/bin/python3 @INSTALL_DIR@/bridge.py @BRIDGE_MAP@
 Restart=on-failure
 RestartSec=5
