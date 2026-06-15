@@ -56,6 +56,21 @@ GRAPHS = {
                    "failed_forward_bundles", "abandoned_bundles",
                    "discarded_bundles"],
     },
+    "bp_flow_bundles": {
+        "title": "BP bundle flow (bundles/s)",
+        "vlabel": "bundles/s",
+        "category": "dtn",
+        "fields": ["bundles_sourced", "bundles_forwarded",
+                   "bundles_transmitted", "bundles_received",
+                   "bundles_delivered", "bundles_expired"],
+    },
+    "bp_flow_bytes": {
+        "title": "BP bundle flow (bytes/s)",
+        "vlabel": "bytes/s",
+        "category": "dtn",
+        "fields": ["bytes_sourced", "bytes_forwarded", "bytes_transmitted",
+                   "bytes_received", "bytes_delivered", "bytes_expired"],
+    },
     "bp_storage": {
         "title": "BP registrations",
         "vlabel": "count",
@@ -187,6 +202,10 @@ COUNTERS = {
     "failed_forward_bundles", "num_bundles_deleted", "num_fragmented_bundles",
     "num_fragments_produced", "sent_reports", "run_controls", "run_tbr",
     "run_sbr", "run_macros",
+    "bundles_sourced", "bytes_sourced", "bundles_forwarded", "bytes_forwarded",
+    "bundles_transmitted", "bytes_transmitted", "bundles_received",
+    "bytes_received", "bundles_delivered", "bytes_delivered", "bundles_expired",
+    "bytes_expired",
 }
 
 
