@@ -153,21 +153,21 @@ GRAPHS = {
     },
     "sys_memory": {
         "title": "Host physical memory",
-        "vlabel": "KiB",
+        "vlabel": "bytes",
         "category": "system",
-        "fields": ["mem_total_kb", "mem_used_kb", "mem_free_kb"],
+        "fields": ["mem_total_bytes", "mem_used_bytes", "mem_free_bytes"],
     },
     "sys_swap": {
         "title": "Host swap",
-        "vlabel": "KiB",
+        "vlabel": "bytes",
         "category": "system",
-        "fields": ["swap_total_kb", "swap_free_kb"],
+        "fields": ["swap_total_bytes", "swap_free_bytes"],
     },
     "sys_disk": {
         "title": "Host root filesystem",
-        "vlabel": "KiB",
+        "vlabel": "bytes",
         "category": "system",
-        "fields": ["disk_total_kb", "disk_used_kb", "disk_free_kb"],
+        "fields": ["disk_total_bytes", "disk_used_bytes", "disk_free_bytes"],
     },
     "sys_files": {
         "title": "Host open file handles",
@@ -194,6 +194,14 @@ _METRIC2GRAPH = {}
 for _g, _spec in GRAPHS.items():
     for _f in _spec["fields"]:
         _METRIC2GRAPH[_f] = _g
+
+# Graphs not shown in Munin (data still collected, just not emitted).  Override
+# with the NM2MUNIN_HIDDEN_GRAPHS env var (space/comma-separated graph keys;
+# set it empty to show everything).  Default hides low-value / mostly-static graphs.
+_DEFAULT_HIDDEN = ("ion_clock ion_rates nm_other ion_sdr_storage ion_sdr_heap "
+                   "ion_sdr_congestion sys_cpus")
+HIDDEN_GRAPHS = set(os.environ.get("NM2MUNIN_HIDDEN_GRAPHS", _DEFAULT_HIDDEN)
+                    .replace(",", " ").split())
 
 # Cumulative counters -> graph as a per-second rate (DERIVE) so traffic shows as
 # a curve rather than an ever-rising staircase.  Everything else is a level (GAUGE).
@@ -355,6 +363,8 @@ def build_spool(eid, since):
         maxts = max(maxts, new[-1][0])
     lines = []
     for g, fields in graphs.items():
+        if g in HIDDEN_GRAPHS:
+            continue
         spec = GRAPHS.get(g, {"title": g, "vlabel": "value",
                               "category": "dtn", "fields": list(fields)})
         lines.append("multigraph %s" % sanitise(g))
@@ -379,6 +389,8 @@ def build_config(eid):
     present = set(data.keys())
     lines = []
     for g, spec in GRAPHS.items():
+        if g in HIDDEN_GRAPHS:
+            continue
         flds = [f for f in spec["fields"] if f in present]
         if not flds:
             continue
