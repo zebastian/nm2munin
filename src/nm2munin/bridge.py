@@ -143,7 +143,7 @@ GRAPHS = {
         "vlabel": "%",
         "category": "system",
         "fields": ["cpu_util_pct"],
-        "args": "--upper-limit 100 -l 0",
+        "args": "--upper-limit 100",
     },
     "sys_cpus": {
         "title": "Host CPU count",
@@ -173,7 +173,8 @@ GRAPHS = {
         "title": "Host open file handles",
         "vlabel": "files",
         "category": "system",
-        "fields": ["open_files", "max_files"],
+        "fields": ["open_files"],
+        "hidden_fields": ["max_files"]
     },
     "sys_procs": {
         "title": "Host processes",
@@ -226,6 +227,11 @@ def emit_field_decl(lines, metric):
     lines.append("%s.type %s" % (metric, field_type(metric)))
     if field_type(metric) == "DERIVE":
         lines.append("%s.min 0" % metric)
+
+
+def graph_args(spec):
+    """Munin graph_args: always anchor the Y axis at 0, plus any per-graph args."""
+    return ("--lower-limit 0 " + spec.get("args", "")).strip()
 
 
 def sanitise(name):
@@ -371,8 +377,7 @@ def build_spool(eid, since):
         lines.append("graph_title %s" % spec["title"])
         lines.append("graph_category %s" % spec.get("category", "dtn"))
         lines.append("graph_vlabel %s" % spec.get("vlabel", "value"))
-        if spec.get("args"):
-            lines.append("graph_args %s" % spec["args"])
+        lines.append("graph_args %s" % graph_args(spec))
         for metric in fields:
             emit_field_decl(lines, metric)
         for metric, samples in fields.items():
@@ -398,8 +403,7 @@ def build_config(eid):
         lines.append("graph_title %s" % spec["title"])
         lines.append("graph_category %s" % spec.get("category", "dtn"))
         lines.append("graph_vlabel %s" % spec.get("vlabel", "value"))
-        if spec.get("args"):
-            lines.append("graph_args %s" % spec["args"])
+        lines.append("graph_args %s" % graph_args(spec))
         for f in flds:
             emit_field_decl(lines, f)
     return "\n".join(lines)
