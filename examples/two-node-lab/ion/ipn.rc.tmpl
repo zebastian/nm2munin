@@ -1,1 +1,5 @@
 a plan @PEER_NODE@ udp/@PEER_IP@:@CLA_PORT@
+# Self-plan for node-local (loopback) delivery: lets a co-located NM manager
+# poll a local nm-agent (e.g. ipn:1.1 -> ipn:1.2). Without it, locally-sourced
+# bundles to a local endpoint have no egress plan and are dropped.
+a plan @NODE_NBR@ udp/@LOCAL_IP@:@CLA_PORT@

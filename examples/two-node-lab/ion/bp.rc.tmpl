@@ -7,4 +7,6 @@ a endpoint ipn:@NODE_NBR@.3 q
 a protocol udp 1400 100
 a induct udp @LOCAL_IP@:@CLA_PORT@ udpcli
 a outduct udp @PEER_IP@:@CLA_PORT@ udpclo
+# Loopback outduct backing the self-plan in ipn.rc (node-local delivery).
+a outduct udp @LOCAL_IP@:@CLA_PORT@ udpclo
 s
