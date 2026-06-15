@@ -49,9 +49,11 @@ SYS = ("c115410505022523918218de41008218de41018218de41028218de4103"
 # BP bundle-flow lifetime totals -- DTN/bp_agent EDDs 0x1d-0x28, each as a
 # bundle count + byte count: sourced, forwarded, transmitted, received,
 # delivered, expired. Needs nm_agent/nm_mgr built with these EDDs.
-BP_FLOW = ("c1154105050225238c82182a411d82182a411e82182a411f82182a4120"
-           "82182a412182182a412282182a412382182a412482182a412582182a4126"
-           "82182a412782182a412800")
+# NB: EDD ids >= 24 are CBOR-encoded as two bytes (0x18 id) inside a 2-byte
+# bstr -> ARI "82182a4218<id>" (not "82182a41<id>", which only holds ids < 24).
+BP_FLOW = ("c1154105050225238c82182a42181d82182a42181e82182a42181f82182a421820"
+           "82182a42182182182a42182282182a42182382182a42182482182a42182582182a421826"
+           "82182a42182782182a42182800")
 CONTROLS = [BP, ION, ION_SDR, ION_MEM, SYS, BP_FLOW]
 
 
