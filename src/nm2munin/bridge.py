@@ -77,6 +77,19 @@ GRAPHS = {
         "fields": ["inbound_heap_occupancy_limit",
                    "outbound_heap_occupancy_limit"],
     },
+    "ion_working_memory": {
+        "title": "ION working memory (ionwm) usage",
+        "vlabel": "bytes",
+        "category": "ion_sdr",
+        "fields": ["working_memory_total", "working_memory_free",
+                   "working_memory_used"],
+    },
+    "ion_heap": {
+        "title": "ION SDR heap usage",
+        "vlabel": "bytes",
+        "category": "ion_sdr",
+        "fields": ["heap_total", "heap_free", "heap_used"],
+    },
     "ion_sdr_congestion": {
         "title": "ION congestion forecast horizon",
         "vlabel": "epoch (0 = none)",
@@ -103,26 +116,61 @@ GRAPHS = {
                    "num_controls", "run_controls", "num_macros",
                    "run_macros", "sent_reports", "num_rpt_tpls"],
     },
-    "host_cpu": {
-        "title": "Host CPU load",
+    # Host OS resources from the DTN/sys ADM (collected over NM).
+    "sys_load": {
+        "title": "Host load average",
+        "vlabel": "load",
+        "category": "system",
+        "fields": ["load_1min", "load_5min", "load_15min"],
+    },
+    "sys_cpu": {
+        "title": "Host CPU utilization",
         "vlabel": "%",
         "category": "system",
-        "fields": ["cpu"],
+        "fields": ["cpu_util_pct"],
         "args": "--upper-limit 100 -l 0",
     },
-    "host_mem": {
-        "title": "Host memory used",
-        "vlabel": "%",
+    "sys_cpus": {
+        "title": "Host CPU count",
+        "vlabel": "cpus",
         "category": "system",
-        "fields": ["mem"],
-        "args": "--upper-limit 100 -l 0",
+        "fields": ["num_cpus"],
     },
-    "host_disk": {
-        "title": "Host disk used (root fs)",
-        "vlabel": "%",
+    "sys_memory": {
+        "title": "Host physical memory",
+        "vlabel": "KiB",
         "category": "system",
-        "fields": ["disk"],
-        "args": "--upper-limit 100 -l 0",
+        "fields": ["mem_total_kb", "mem_used_kb", "mem_free_kb"],
+    },
+    "sys_swap": {
+        "title": "Host swap",
+        "vlabel": "KiB",
+        "category": "system",
+        "fields": ["swap_total_kb", "swap_free_kb"],
+    },
+    "sys_disk": {
+        "title": "Host root filesystem",
+        "vlabel": "KiB",
+        "category": "system",
+        "fields": ["disk_total_kb", "disk_used_kb", "disk_free_kb"],
+    },
+    "sys_files": {
+        "title": "Host open file handles",
+        "vlabel": "files",
+        "category": "system",
+        "fields": ["open_files", "max_files"],
+    },
+    "sys_procs": {
+        "title": "Host processes",
+        "vlabel": "count",
+        "category": "system",
+        "fields": ["num_procs"],
+    },
+    "sys_uptime": {
+        "title": "Host uptime",
+        "vlabel": "seconds",
+        "category": "system",
+        "fields": ["uptime_sec"],
     },
 }
 

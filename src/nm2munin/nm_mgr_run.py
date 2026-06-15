@@ -35,7 +35,18 @@ ION = "c1154105050225238582188e410082188e410182188e410482188e410a82188e410c00"
 # ION SDR / ZCO storage: in/out fs+heap occupancy limits, congestion alarm+forecast
 ION_SDR = ("c1154105050225238682188e410582188e410682188e410882188e4109"
            "82188e410282188e410300")
-CONTROLS = [BP, ION, ION_SDR]
+# ION memory pools (DTN/ion EDDs 0x0e-0x13): working_memory + heap total/free/used.
+# Needs nm_agent/nm_mgr built with the DTN/ion memory EDDs.
+ION_MEM = ("c1154105050225238682188e410e82188e410f82188e411082188e4111"
+           "82188e411282188e411300")
+# Host OS resources -- DTN/sys ADM (nickname 0xde), all 17 EDDs 0x00-0x10:
+# num_cpus, load 1/5/15min, cpu_util_pct, mem/swap/disk total/free/used,
+# open/max files, num_procs, uptime_sec. Needs nm_agent/nm_mgr with DTN/sys.
+SYS = ("c115410505022523918218de41008218de41018218de41028218de4103"
+       "8218de41048218de41058218de41068218de41078218de41088218de4109"
+       "8218de410a8218de410b8218de410c8218de410d8218de410e8218de410f"
+       "8218de411000")
+CONTROLS = [BP, ION, ION_SDR, ION_MEM, SYS]
 
 
 def main():
