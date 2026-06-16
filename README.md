@@ -1,11 +1,14 @@
 # nm2munin
 
-Bridge ION-DTN Network Management (NM / CCSDS AMP) reports into
-[Munin](https://munin-monitoring.org/), **time-shift capable**: each metric is
-graphed at the agent-side generation epoch embedded in its AMP report, not at
-the time the ground station received it. Metrics that arrive late over a DTN
-link — or after a manager/bridge outage — are still plotted at the moment they
-were actually measured.
+Bridge ION-DTN Network Management (NM / CCSDS AMP) reports into Munin.
+
+![](examples/two-node-lab/sample_munin_screenshot.png)
+
+Integrates to the [Munin](https://munin-monitoring.org/) Network monitoring system, 
+**time-shift capable**: each metric is graphed at the agent-side generation epoch 
+embedded in its AMP report, not at the time the ground station received it. 
+Metrics that arrive late over a DTN link — or after a manager/bridge outage 
+— are still plotted at the moment they were actually measured.
 
 This project is the **manager/bridge** side: it polls a set of NM agents,
 collects their reports, and serves them to a Munin master. It is independent of
