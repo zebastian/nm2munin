@@ -33,6 +33,9 @@ REPORTS_DIR = os.environ.get("NM2MUNIN_REPORTS", "/var/lib/nm/reports")
 HOST_DIR = os.environ.get("NM2MUNIN_HOSTMETRICS", "/var/lib/nm/hostmetrics")
 PORT_BASE = int(os.environ.get("NM2MUNIN_PORT_BASE", "4950"))
 BIND_ADDR = os.environ.get("NM2MUNIN_BIND", "127.0.0.1")
+# `config` only needs the current metric set; look back this far (seconds) so
+# it reads just the newest log file(s) rather than the whole rotated history.
+CONFIG_LOOKBACK_SEC = int(os.environ.get("NM2MUNIN_CONFIG_LOOKBACK", "600"))
 
 # ---------------------------------------------------------------------------
 # Metric -> graph grouping.  AMP gen_rpts of individual EDDs yields one small
@@ -335,11 +338,42 @@ def parse_host_log(path, out):
                 pass
 
 
-def collect(eid):
-    """Return {metric: sorted [(epoch,value)]} for one EID."""
+def _merge(dst, src):
+    for k, v in src.items():
+        dst.setdefault(k, []).extend(v)
+
+
+def collect(eid, since=0):
+    """Return {metric: sorted [(epoch,value)]} for one EID.
+
+    nm_mgr rotates report logs into <eid>/<N>.log forever and never prunes
+    them, so reading every file on each poll is O(total history) -- the cost
+    grows without bound.  Since munin only wants samples newer than `since`,
+    read the report logs newest-mtime first and stop once a file reaches back
+    to/below `since`: older files can only hold older samples (a sample's
+    epoch is its generation time, so a file written in the past cannot contain
+    an epoch newer than `since`).  In steady state this reads just the current
+    file -- two across a rotation boundary -- instead of the whole history.
+    `since=0` (e.g. a `fetch`, or a master spool reset) still reads everything
+    so full backfill keeps working.
+    """
     out = {}
-    for f in glob.glob(os.path.join(REPORTS_DIR, eid, "*.log")):
-        parse_report_log(f, out)
+    logs = glob.glob(os.path.join(REPORTS_DIR, eid, "*.log"))
+    try:
+        logs.sort(key=lambda p: os.stat(p).st_mtime, reverse=True)
+    except OSError:
+        pass
+    for path in logs:
+        tmp = {}
+        parse_report_log(path, tmp)
+        _merge(out, tmp)
+        if since:
+            fmin = min((e for samples in tmp.values() for (e, _) in samples),
+                       default=None)
+            # This file already reaches back to/below `since`; everything
+            # newer than `since` is in the files read so far.
+            if fmin is not None and fmin <= since:
+                break
     hm = os.path.join(HOST_DIR, eid + ".hm")
     if os.path.exists(hm):
         parse_host_log(hm, out)
@@ -356,7 +390,7 @@ def graph_for(metric):
 
 def build_spool(eid, since):
     """Return spoolfetch text: multigraph blocks with timestamped values > since."""
-    data = collect(eid)
+    data = collect(eid, since)
     # group metrics into graphs
     graphs = {}
     maxts = since
@@ -390,7 +424,9 @@ def build_spool(eid, since):
 
 def build_config(eid):
     """Return config text (multigraph) for known graphs that have data."""
-    data = collect(eid)
+    # config only needs the set of currently-reported metrics, so a short
+    # lookback (one or two recent files) is enough -- no full-history scan.
+    data = collect(eid, int(time.time()) - CONFIG_LOOKBACK_SEC)
     present = set(data.keys())
     lines = []
     for g, spec in GRAPHS.items():
