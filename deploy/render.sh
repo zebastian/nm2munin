@@ -25,8 +25,8 @@ source "$ENVFILE"
 
 : "${MGR_EID:?}" "${NM_AGENTS:?}" "${BRIDGE_MAP:?}" "${INSTALL_DIR:?}"
 : "${ION_USER:?}" "${ION_GROUP:?}" "${NM_INTERVAL:?}"
-: "${NM2MUNIN_BIND:=127.0.0.1}"
-export NM2MUNIN_BIND
+: "${NM2MUNIN_BIND:=127.0.0.1}" "${NM_REPORTING:=tbr}" "${NM_TBR_REFRESH:=300}"
+export NM2MUNIN_BIND NM_REPORTING NM_TBR_REFRESH
 
 OUT="${2:-$ROOT/build/manager}"
 rm -rf "$OUT"

@@ -36,6 +36,15 @@ BIND_ADDR = os.environ.get("NM2MUNIN_BIND", "127.0.0.1")
 # `config` only needs the current metric set; look back this far (seconds) so
 # it reads just the newest log file(s) rather than the whole rotated history.
 CONFIG_LOOKBACK_SEC = int(os.environ.get("NM2MUNIN_CONFIG_LOOKBACK", "600"))
+# The agents' reporting period in seconds.  When set, every graph asks Munin to
+# keep its samples at that resolution (update_rate) and for how long
+# (graph_data_size), instead of Munin's default of one value per 5 minutes:
+# else samples closer together than 5 minutes, such as those an agent measured
+# while its link was down, merge into one.  Munin applies it to the RRD files it
+# creates from then on.
+UPDATE_RATE = os.environ.get("NM2MUNIN_UPDATE_RATE", "")
+GRAPH_DATA_SIZE = os.environ.get("NM2MUNIN_GRAPH_DATA_SIZE",
+                                 "custom 1d, 5m for 1w, 1h for 1y")
 
 # ---------------------------------------------------------------------------
 # Metric -> graph grouping.  AMP gen_rpts of individual EDDs yields one small
@@ -237,6 +246,17 @@ def graph_args(spec):
     return ("--lower-limit 0 " + spec.get("args", "")).strip()
 
 
+def emit_graph_head(lines, g, spec):
+    lines.append("multigraph %s" % sanitise(g))
+    lines.append("graph_title %s" % spec["title"])
+    lines.append("graph_category %s" % spec.get("category", "dtn"))
+    lines.append("graph_vlabel %s" % spec.get("vlabel", "value"))
+    lines.append("graph_args %s" % graph_args(spec))
+    if UPDATE_RATE:
+        lines.append("update_rate %s" % UPDATE_RATE)
+        lines.append("graph_data_size %s" % GRAPH_DATA_SIZE)
+
+
 def sanitise(name):
     """Munin field/graph names: [A-Za-z_][A-Za-z0-9_]*"""
     s = re.sub(r"[^A-Za-z0-9_]", "_", name)
@@ -407,11 +427,7 @@ def build_spool(eid, since):
             continue
         spec = GRAPHS.get(g, {"title": g, "vlabel": "value",
                               "category": "dtn", "fields": list(fields)})
-        lines.append("multigraph %s" % sanitise(g))
-        lines.append("graph_title %s" % spec["title"])
-        lines.append("graph_category %s" % spec.get("category", "dtn"))
-        lines.append("graph_vlabel %s" % spec.get("vlabel", "value"))
-        lines.append("graph_args %s" % graph_args(spec))
+        emit_graph_head(lines, g, spec)
         for metric in fields:
             emit_field_decl(lines, metric)
         for metric, samples in fields.items():
@@ -435,11 +451,7 @@ def build_config(eid):
         flds = [f for f in spec["fields"] if f in present]
         if not flds:
             continue
-        lines.append("multigraph %s" % sanitise(g))
-        lines.append("graph_title %s" % spec["title"])
-        lines.append("graph_category %s" % spec.get("category", "dtn"))
-        lines.append("graph_vlabel %s" % spec.get("vlabel", "value"))
-        lines.append("graph_args %s" % graph_args(spec))
+        emit_graph_head(lines, g, spec)
         for f in flds:
             emit_field_decl(lines, f)
     return "\n".join(lines)

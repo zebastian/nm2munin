@@ -10,8 +10,8 @@ embedded in its AMP report, not at the time the ground station received it.
 Metrics that arrive late over a DTN link — or after a manager/bridge outage 
 — are still plotted at the moment they were actually measured.
 
-This project is the **manager/bridge** side: it polls a set of NM agents,
-collects their reports, and serves them to a Munin master. It is independent of
+This project is the **manager/bridge** side: it has a set of NM agents report
+on their own clock, collects their reports, and serves them to a Munin master. It is independent of
 any particular DTN topology — you describe your agents in one env file and the
 daemons and units are generated from it. A complete worked example of an ION
 network feeding this manager lives under
@@ -23,7 +23,7 @@ network feeding this manager lives under
    NM agents (any topology)              this project, on the manager host
    ┌───────────────┐                     ┌───────────────────────────────────┐
    │ nm_agent EID1 │── AMP reports ─────▶│ nm-mgr   (nm_mgr_run.py)          │
-   │ nm_agent EID2 │   over BP/DTN       │   polls agents, logs reports to   │
+   │ nm_agent EID2 │   over BP/DTN       │   sets agents' rules, logs to     │
    │      ...      │                     │   /var/lib/nm/reports/<eid>/      │
    └───────────────┘                     │                                   │
                                          │ nm2munin (bridge.py)              │
@@ -37,13 +37,17 @@ network feeding this manager lives under
 ```
 
 - **`nm-mgr`** (`nm_mgr_run.py`) runs `nm_mgr` headless, registers the
-  configured agents, and every `NM_INTERVAL` seconds requests a curated set of
-  scalar EDD reports. `nm_mgr` logs each report with the agent-side generation
-  timestamp.
+  configured agents, and installs a time-based rule on each that sends a
+  curated set of scalar EDD reports every `NM_INTERVAL` seconds. The agent
+  keeps measuring while its link is down; the reports wait in its bundle queue
+  until the link is back. `nm_mgr` logs each report with the agent-side
+  generation timestamp. `NM_REPORTING=poll` requests the reports from the
+  manager instead, as before, which only works while the link is up.
 - **`nm2munin`** (`bridge.py`) presents each agent EID as its own Munin node on
   a local TCP port, speaking the munin-node protocol with the `spool`
   capability. Because samples are emitted at their embedded epoch, the Munin
-  master stores them time-shifted into the past.
+  master stores them time-shifted into the past, at the resolution of
+  `NM_INTERVAL` (Munin's `update_rate`) rather than Munin's 5 minutes.
 
 See [docs/architecture.md](docs/architecture.md) for the report→graph mapping
 and the spoolfetch time-shift mechanism.
@@ -85,9 +89,11 @@ Everything topology-specific is in `config/manager.env`:
 | Variable      | Meaning                                                        |
 |---------------|----------------------------------------------------------------|
 | `MGR_EID`     | EID of the local NM manager (`nm_mgr -A`)                       |
-| `NM_AGENTS`   | space-separated agent EIDs to poll                             |
+| `NM_AGENTS`   | space-separated agent EIDs to collect reports from             |
 | `BRIDGE_MAP`  | `EID=port` map exposed to Munin, one free local port per agent |
-| `NM_INTERVAL` | poll cadence in seconds                                        |
+| `NM_INTERVAL` | reporting period in seconds, and Munin's resolution            |
+| `NM_REPORTING`| `tbr` (default): rule on the agent; `poll`: from the manager   |
+| `NM_TBR_REFRESH` | seconds between re-sending the rule, for restarted agents  |
 | `INSTALL_DIR` | where the daemons are installed (`/opt/nm2munin`)              |
 
 Add an agent by appending its EID to `NM_AGENTS` and an `EID=port` pair to
